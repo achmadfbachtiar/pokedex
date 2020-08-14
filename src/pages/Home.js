@@ -2,10 +2,22 @@ import React, { Component } from 'react';
 import { Row, Col } from 'react-simple-flex-grid';
 import pokedex from '../images/pokedex_logo.png';
 import PokeCard from '../components/PokeCard';
+import PokemonDetail from '../components/PokemonDetail';
 import Modal from 'react-modal';
 
 import 'react-simple-flex-grid/lib/main.css';
-import './Home.css'
+import './Home.css';
+
+const customStyles = {
+  content : {
+    top                   : '50%',
+    left                  : '50%',
+    right                 : 'auto',
+    bottom                : 'auto',
+    marginRight           : '-50%',
+    transform             : 'translate(-50%, -50%)'
+  }
+};
 
 class Home extends Component {
 	constructor(props) {
@@ -15,7 +27,9 @@ class Home extends Component {
 	  	offset: 0,
 	  	generationList: [],
 	  	pokemonList: [],
-	  	pokemonDetail: {}
+	  	pokemonDetail: {},
+	  	modalShown: false,
+	  	activeIndex: null
 	  };
 	}
 
@@ -41,7 +55,6 @@ class Home extends Component {
 		let newOffset = offset
 		newOffset = newOffset + 18
 	  const wrappedElement = document.getElementById('header');
-	  console.log('this.isBottom(wrappedElement)', this.isBottom(wrappedElement))
 	  if (this.isBottom(wrappedElement)) {
 	  	this.setState({
 	  		offset: newOffset
@@ -79,11 +92,23 @@ class Home extends Component {
 		}
 	}
 
-	getPokemonDetail() {
-
+	async getPokemonDetail(pokemonName) {
+		try {
+			const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonName}`)
+			const data = await response.json()
+			console.log('data', data)
+			this.setState({
+				pokemonDetail: data
+			})
+		} catch(error) {
+			console.log(error)
+		}
 	}
 
-	async getFilteredPokemonList(url) {
+	async getFilteredPokemonList(url, index) {
+		this.setState({
+			activeIndex: index
+		})
 		try {
 			const response = await fetch(`${url}`)
 			const data = await response.json()
@@ -96,8 +121,12 @@ class Home extends Component {
 		}
 	}
 
-	showPokemonDetail() {
-		alert('asdasd')
+	showPokemonDetail(pokemonName) {
+		this.setState({
+			modalShown: true
+		}, () => {
+			this.getPokemonDetail(pokemonName)
+		})
 	}
 
 	resetState() {
@@ -105,7 +134,8 @@ class Home extends Component {
 			offset: 0,
 	  	generationList: [],
 	  	pokemonList: [],
-	  	pokemonDetail: {}
+	  	pokemonDetail: {},
+	  	activeIndex: null
 		}, () => {
 			this.getGenerationList()
 			this.getPokemonList()
@@ -114,17 +144,24 @@ class Home extends Component {
 	}
 
 	render() {
-		const { generationList, pokemonList } = this.state
+		const { 
+			generationList, 
+			pokemonList, 
+			pokemonDetail, 
+			modalShown,
+			activeIndex 
+		} = this.state
+
 		return(
 			<div className="container" id="header">
 				<div>
 					<img src={pokedex} onClick={() => this.resetState()}/>
 				</div>
-				<Row>
+				<Row gutter={10} justify="center">
 					{generationList.map((item, index) => {
 						return(
-							<Col xs={12} sm={6} md={4} lg={4} xl={3} key={index}>
-								<p onClick={() => this.getFilteredPokemonList(item.url)}>
+							<Col xs={12} sm={6} md={4} lg={3} xl={1} key={index}>
+								<p onClick={() => this.getFilteredPokemonList(item.url, index)} className={`${index == activeIndex ? "active" : "inactive"}`}>
 									{item.name.toUpperCase()}
 								</p>
 							</Col>
@@ -135,14 +172,14 @@ class Home extends Component {
 					{pokemonList.map((item, index) => {
 						return(
 							<Col xs={12} sm={6} md={4} lg={3} xl={2} key={index}>
-								<PokeCard item={item} handleClick={() => this.showPokemonDetail()} />
+								<PokeCard item={item} handleClick={() => this.showPokemonDetail(item.name)} />
 							</Col>
 						)
 					})}
 				</Row>
-				<Modal isOpen={false}>
+				<Modal isOpen={modalShown}>
+					<PokemonDetail pokemonDetail={pokemonDetail} closeModal={() => this.setState({pokemonDetail: {}, modalShown: false})}/>
         </Modal>
-
 			</div>
 		)
 	}
