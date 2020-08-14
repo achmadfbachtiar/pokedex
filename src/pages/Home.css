@@ -1,0 +1,26 @@
+.container {
+  padding: 3vw;
+}
+
+.active {
+  font-size: 12px;
+  font-weight: bold;
+  color: #ffffff;
+  background: #f61426;
+  padding: 5px 10px;
+  border-radius: 25px;
+  max-width: 10vw;
+  cursor: pointer;
+}
+
+.inactive {
+  font-size: 12px;
+  font-weight: normal;
+  color: #f61426;
+  background: #ffffff;
+  padding: 5px 10px;
+  border: 1px solid #f61426;
+  border-radius: 25px;
+  max-width: 10vw;
+  cursor: pointer;
+}
