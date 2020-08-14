@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col } from 'react-simple-flex-grid';
 import pokedex from '../images/pokedex_logo.png';
-import pokeball from '../images/pokeball.png';
+import PokeCard from '../components/PokeCard';
 
 import 'react-simple-flex-grid/lib/main.css';
 import './Home.css'
@@ -11,6 +11,7 @@ class Home extends Component {
 	  super(props);
 	
 	  this.state = {
+	  	offset: 0,
 	  	generationList: [],
 	  	pokemonList: [],
 	  	pokemonDetail: {}
@@ -35,8 +36,9 @@ class Home extends Component {
 	}
 
 	async getPokemonList() {
+		const { offset } = this.state
 		try {
-			const response = await fetch('https://pokeapi.co/api/v2/pokemon?offset=0&limit=18')
+			const response = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=18`)
 			const data = await response.json()
 			this.setState({
 				pokemonList: data.results
@@ -48,6 +50,18 @@ class Home extends Component {
 
 	getPokemonDetail() {
 
+	}
+
+	async getFilteredPokemonList(url) {
+		try {
+			const response = await fetch(`${url}`)
+			const data = await response.json()
+			this.setState({
+				pokemonList: data.pokemon_species
+			})
+		} catch(error) {
+			console.log(error)
+		}
 	}
 
 	render() {
@@ -62,7 +76,7 @@ class Home extends Component {
 					{generationList.map((item, index) => {
 						return(
 							<Col span={3}>
-								<p>
+								<p onClick={() => this.getFilteredPokemonList(item.url)}>
 									{item.name.toUpperCase()}
 								</p>
 							</Col>
@@ -73,7 +87,7 @@ class Home extends Component {
 					{pokemonList.map((item, index) => {
 						return(
 							<Col span={2}>
-						    {item.name.toUpperCase()}
+								<PokeCard item={item} />
 							</Col>
 						)
 					})}
