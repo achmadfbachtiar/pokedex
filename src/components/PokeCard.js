@@ -4,13 +4,13 @@ import pokeball from '../images/pokeball.png';
 
 class PokeCard extends Component {
 	render() {
-		const { item } = this.props
+		const { item, handleClick } = this.props
 		return(
-			<div className="card">
+			<div className="card" onClick={handleClick}>
         <div className="card-top">
           <img className="card-img" src={pokeball} />
         </div>
-        <div className="card-bottom text-center">
+        <div className="card-bottom">
           <h2 className="card-title">
           	{item.name.toUpperCase()}
           </h2>
